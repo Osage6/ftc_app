@@ -6,8 +6,8 @@ package org.firstinspires.ftc.teamcode;
 
 public class MitchellBotCalibration extends MitchellBotConstants {
     public static double TRAY_PINCH_EPSILON = 0.07;
-    public static double JEWEL_ARM_DEPLOYED = 0.1;
-    public static double JEWEL_ARM_RETRACTED = 0.9;
+    public static double arm_servo_DEPLOYED = 0.1;
+    public static double arm_servo_RETRACTED = 0.9;
     public static double SLOW_COLLECT = 0.4;
 
     public static double TRAY_EPSILON = 0.05;
@@ -34,7 +34,7 @@ public class MitchellBotCalibration extends MitchellBotConstants {
     public static double WIGGLE_WAIT = 0.4;
 
     public static boolean LOCK_DRIVE_WHEELS = false;
-    public static boolean LOCK_INTAKE_WHEELS = true;
+    public static boolean LOCK_ARM = true;
 
     public static boolean RAMP_DRIVE_POWER = true;
     public static double RAMP_DRIVE_DURATION = 0.0015;

@@ -58,20 +58,20 @@ public class PioneersBase extends OpMode {
     @Override
     public void init() {
         appContext = hardwareMap.appContext;
-        new MitchellBotCalibration().readFromFile();
+        new PioneersCalibration().readFromFile();
 
         left_drive = hardwareMap.dcMotor.get("left drive");
         right_drive = hardwareMap.dcMotor.get("right drive");
         // Do we want brake mode here?
         DcMotor.ZeroPowerBehavior drive_mode = DcMotor.ZeroPowerBehavior.FLOAT;
-        if (MitchellBotCalibration.LOCK_DRIVE_WHEELS) {
+        if (PioneersCalibration.LOCK_DRIVE_WHEELS) {
             drive_mode = DcMotor.ZeroPowerBehavior.BRAKE;
         }
         left_drive.setZeroPowerBehavior(drive_mode);
         right_drive.setZeroPowerBehavior(drive_mode);
 
         DcMotor.ZeroPowerBehavior intake_mode = DcMotor.ZeroPowerBehavior.FLOAT;
-        if (MitchellBotCalibration.LOCK_INTAKE_WHEELS) {
+        if (PioneersCalibration.LOCK_INTAKE_WHEELS) {
             intake_mode = DcMotor.ZeroPowerBehavior.BRAKE;
         }
         left_intake = hardwareMap.dcMotor.get("left intake");
@@ -97,7 +97,7 @@ public class PioneersBase extends OpMode {
         jewel_arm = hardwareMap.servo.get("jewel arm");
         jewel_color = hardwareMap.get(ColorSensor.class, "jewel color");
 
-        menu_controller = new MenuController(new MitchellBotCalibration());
+        menu_controller = new MenuController(new PioneersCalibration());
     }
 
     @Override
@@ -146,11 +146,11 @@ public class PioneersBase extends OpMode {
     }
 
     protected void open_tray() {
-        set_tray_pinch(MitchellBotCalibration.TRAY_PINCH_OPEN);
+        set_tray_pinch(PioneersCalibration.TRAY_PINCH_OPEN);
     }
 
     protected void wide_open_tray() {
-        set_tray_pinch(MitchellBotCalibration.TRAY_PINCH_WIDE_OPEN);
+        set_tray_pinch(PioneersCalibration.TRAY_PINCH_WIDE_OPEN);
     }
 
     private double tray_pinch() {
@@ -158,11 +158,11 @@ public class PioneersBase extends OpMode {
     }
 
     protected boolean tray_open() {
-        return (tray_pinch() - MitchellBotCalibration.TRAY_PINCH_OPEN) < MitchellBotCalibration.TRAY_PINCH_EPSILON;
+        return (tray_pinch() - PioneersCalibration.TRAY_PINCH_OPEN) < PioneersCalibration.TRAY_PINCH_EPSILON;
     }
 
     protected void close_tray() {
-        set_tray_pinch(MitchellBotCalibration.TRAY_PINCH_CLOSE);
+        set_tray_pinch(PioneersCalibration.TRAY_PINCH_CLOSE);
     }
 
     protected void set_tray_angle(double pos) {
@@ -175,11 +175,11 @@ public class PioneersBase extends OpMode {
     }
 
     protected boolean tray_deployed() {
-        return Math.abs(tray_position() - MitchellBotCalibration.TRAY_DEPLOY_POSITION) < MitchellBotCalibration.TRAY_EPSILON;
+        return Math.abs(tray_position() - PioneersCalibration.TRAY_DEPLOY_POSITION) < PioneersCalibration.TRAY_EPSILON;
     }
 
     protected boolean tray_collecting() {
-        return Math.abs(tray_position() - MitchellBotCalibration.TRAY_COLLECT_POSITION) < MitchellBotCalibration.TRAY_EPSILON;
+        return Math.abs(tray_position() - PioneersCalibration.TRAY_COLLECT_POSITION) < PioneersCalibration.TRAY_EPSILON;
     }
 
     /**
@@ -214,8 +214,8 @@ public class PioneersBase extends OpMode {
     private double prevRightPower = 0;
     private long lastSetDrivePower = 0;
     protected void set_drive_power(double left, double right) {
-        if (MitchellBotCalibration.RAMP_DRIVE_POWER) {
-            final double maxChangePerMilliSecond = MitchellBotCalibration.RAMP_DRIVE_DURATION;
+        if (PioneersCalibration.RAMP_DRIVE_POWER) {
+            final double maxChangePerMilliSecond = PioneersCalibration.RAMP_DRIVE_DURATION;
             final long ticks = System.currentTimeMillis() - lastSetDrivePower;
             final double maxRamp = Math.max(1, maxChangePerMilliSecond * ticks);
 

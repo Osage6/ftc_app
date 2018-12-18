@@ -12,11 +12,11 @@ import java.util.List;
  */
 
 public class MenuController {
-    private final MitchellBotConstants consts;
+    private final PioneersConstants consts;
     private List<Field> menu_items;
     private int index = 0;
 
-    public MenuController(MitchellBotConstants consts) {
+    public MenuController(PioneersConstants consts) {
         menu_items = (consts.getStaticFields());
         this.consts = consts;
     }

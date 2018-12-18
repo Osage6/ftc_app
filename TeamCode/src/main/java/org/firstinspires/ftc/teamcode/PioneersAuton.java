@@ -90,12 +90,12 @@ public class PioneersAuton extends PioneersBase {
         time = new ElapsedTime();
 
         // spin up a thread for slow initialization
-        if (MitchellBotCalibration.INITIALIZE_IMU || MitchellBotCalibration.INITIALIZE_VUFORIA) {
+        if (PioneersCalibration.INITIALIZE_IMU || PioneersCalibration.INITIALIZE_VUFORIA) {
             new Thread(new Runnable() {
 
                 @Override
                 public void run() {
-                    if (MitchellBotCalibration.INITIALIZE_IMU) {
+                    if (PioneersCalibration.INITIALIZE_IMU) {
                         imu = hardwareMap.get(BNO055IMU.class, "imu");
                         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
                         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
@@ -108,7 +108,7 @@ public class PioneersAuton extends PioneersBase {
                         imu_initialized = true;
                     }
 
-                    if (MitchellBotCalibration.INITIALIZE_VUFORIA) {
+                    if (PioneersCalibration.INITIALIZE_VUFORIA) {
                         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
                         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
@@ -169,7 +169,7 @@ public class PioneersAuton extends PioneersBase {
     @Override
     public void init_loop() {
         super.init_loop();
-        jewel_arm.setPosition(MitchellBotCalibration.JEWEL_ARM_RETRACTED);
+        jewel_arm.setPosition(PioneersCalibration.JEWEL_ARM_RETRACTED);
 
         imu_loop();
         if (looking_for_vumark) {
@@ -190,7 +190,7 @@ public class PioneersAuton extends PioneersBase {
                 break;
 
             case LOWER_ARM:
-                jewel_arm.setPosition(MitchellBotCalibration.COLOR_SENSOR_POS_DOWN);
+                jewel_arm.setPosition(PioneersCalibration.COLOR_SENSOR_POS_DOWN);
                 if (time_in_state > 1.0) {
                     return WAIT_FOR_COLOR_SENSOR;
                 }
@@ -216,7 +216,7 @@ public class PioneersAuton extends PioneersBase {
                 break;
 
             case RAISE_ARM:
-                jewel_arm.setPosition(MitchellBotCalibration.COLOR_SENSOR_POS_UP);
+                jewel_arm.setPosition(PioneersCalibration.COLOR_SENSOR_POS_UP);
                 break;
 
             case REALIGN_ROBOT:

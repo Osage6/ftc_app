@@ -6,9 +6,10 @@ import android.content.Context;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 /**
  * Base code common to all other 10262 opmode
@@ -16,18 +17,18 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Disabled()
 public class MitchellBase extends OpMode {
     private static Context appContext;
-    protected MenuController menu_controller = null;
+    protected MitchellMenuController menu_controller = null;
 
     // Make private to ensure that our set_power routine
     // is used and power ramping is implemented
     private static DcMotor left_drive = null;
     private static DcMotor right_drive = null;
 
-    protected static DcMotor left_intake = null;
-    protected static DcMotor right_intake = null;
+    protected static DcMotor arm_driver = null;
+    protected static DcMotor linear_actuator = null;
 
-    protected static DcMotor left_elevator = null;
-    protected static DcMotor right_elevator = null;
+    protected static Servo arm_servo = null;
+    protected static CRServo sweeper = null;
 
     protected static Servo left_tray_servo = null;
     protected static Servo right_tray_servo = null;
@@ -35,14 +36,13 @@ public class MitchellBase extends OpMode {
     protected static Servo left_pinch = null;
     protected static Servo right_pinch = null;
 
-    protected static Servo jewel_arm = null;
-    protected static ColorSensor jewel_color = null;
+    protected static TouchSensor arm_check = null;
 
-    protected enum TrayState {
+    protected enum ArmState {
         DEPLOYED, DRIVING, COLLECTING, TO_DRIVE,
         TO_DEPLOY, TO_COLLECT, LEVER_UP
     }
-    protected TrayState tray_state = TrayState.COLLECTING;
+    protected ArmState tray_state = ArmState.COLLECTING;
 
     /**
      * Constructor
@@ -60,29 +60,30 @@ public class MitchellBase extends OpMode {
         appContext = hardwareMap.appContext;
         new MitchellBotCalibration().readFromFile();
 
-        left_drive = hardwareMap.dcMotor.get("left drive");
-        right_drive = hardwareMap.dcMotor.get("right drive");
-        // Do we want brake mode here?
+        left_drive = hardwareMap.get(DcMotor.class,"left drive");
+        right_drive = hardwareMap.get(DcMotor.class,"right drive");
         DcMotor.ZeroPowerBehavior drive_mode = DcMotor.ZeroPowerBehavior.FLOAT;
+
         if (MitchellBotCalibration.LOCK_DRIVE_WHEELS) {
             drive_mode = DcMotor.ZeroPowerBehavior.BRAKE;
         }
         left_drive.setZeroPowerBehavior(drive_mode);
         right_drive.setZeroPowerBehavior(drive_mode);
 
-        DcMotor.ZeroPowerBehavior intake_mode = DcMotor.ZeroPowerBehavior.FLOAT;
-        if (MitchellBotCalibration.LOCK_INTAKE_WHEELS) {
-            intake_mode = DcMotor.ZeroPowerBehavior.BRAKE;
+        DcMotor.ZeroPowerBehavior arm_mode = DcMotor.ZeroPowerBehavior.FLOAT;
+        if (MitchellBotCalibration.LOCK_ARM) {
+            arm_mode = DcMotor.ZeroPowerBehavior.BRAKE;
         }
-        left_intake = hardwareMap.dcMotor.get("left intake");
-        right_intake = hardwareMap.dcMotor.get("right intake");
-        left_intake.setZeroPowerBehavior(intake_mode);
-        right_intake.setZeroPowerBehavior(intake_mode);
+        arm_driver = hardwareMap.get(DcMotor.class,"left_arm");
+        arm_driver.setZeroPowerBehavior(arm_mode);
 
-        left_elevator = hardwareMap.dcMotor.get("left elevator");
-        right_elevator = hardwareMap.dcMotor.get("right elevator");
-        left_elevator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        right_elevator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        linear_actuator = hardwareMap.get(DcMotor.class,"linear_actuator");
+        linear_actuator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        arm_servo = hardwareMap.get(Servo.class,"arm_servo");
+        arm_servo.setDirection(Servo.Direction.REVERSE);
+
+        sweeper = hardwareMap.get(CRServo.class,"sweeper");
 
         left_tray_servo = hardwareMap.servo.get("left tray");
         left_tray_servo.setDirection(Servo.Direction.REVERSE);
@@ -94,10 +95,7 @@ public class MitchellBase extends OpMode {
         right_pinch = hardwareMap.servo.get("right pinch");
         right_pinch.setDirection(Servo.Direction.REVERSE);
 
-        jewel_arm = hardwareMap.servo.get("jewel arm");
-        jewel_color = hardwareMap.get(ColorSensor.class, "jewel color");
-
-        menu_controller = new MenuController(new MitchellBotCalibration());
+        menu_controller = new MitchellMenuController(new MitchellBotCalibration());
     }
 
     @Override
@@ -126,18 +124,16 @@ public class MitchellBase extends OpMode {
     @Override
     public void stop() {
         set_drive_power(0,0);
-        stop_intake();
-        stop_elevator();
+        stop_arm();
+        stop_linear_actuator();
     }
 
-    private void stop_intake() {
-        left_intake.setPower(0);
-        right_intake.setPower(0);
+    private void stop_arm() {
+        arm_driver.setPower(0);
     }
 
-    protected void stop_elevator() {
-        left_elevator.setPower(0);
-        right_elevator.setPower(0);
+    protected void stop_linear_actuator() {
+        linear_actuator.setPower(0);
     }
 
     protected void set_tray_pinch(double pos) {
