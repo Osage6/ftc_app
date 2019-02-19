@@ -2,34 +2,47 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.vuforia.CameraDevice;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.MitchellAuton.State.ADJUST;
 import static org.firstinspires.ftc.teamcode.MitchellAuton.State.FINISHED;
-import static org.firstinspires.ftc.teamcode.MitchellAuton.State.READ_COLOR_SENSOR;
-import static org.firstinspires.ftc.teamcode.MitchellAuton.State.WAIT_FOR_COLOR_SENSOR;
+import static org.firstinspires.ftc.teamcode.MitchellAuton.State.LOOK_FOR_GOLD;
+import static org.firstinspires.ftc.teamcode.MitchellAuton.State.STOP;
+import static org.firstinspires.ftc.teamcode.MitchellAuton.State.TF_ACTIVATE;
 
 /**
  * AutonDrive Mode
  * <p>
+ *
+ *     Modified by Mitchell from 12/18/18
+ *     The states that require knowledge of the color alliance are left to the
+ *     subclass that extends this one
+ *     This sets the initial state and behavior when autonomous begins
+ *
  */
-@Disabled
+//@Disabled
 public class MitchellAuton extends MitchellBase {
 
     enum State {
         BEGIN,
-        LOWER_ARM,
-        WAIT_FOR_COLOR_SENSOR,
-        READ_COLOR_SENSOR,
-        FOUND_BLUE_JEWEL,
-        FOUND_RED_JEWEL,
-        KNOCK_BLUE_JEWEL,
-        KNOCK_RED_JEWEL,
-        RAISE_ARM,
+        LOWER_ACTUATOR,
+        ADJUST,
+        TF_ACTIVATE,
+        LOOK_FOR_GOLD,
+        DRIVE_THROUGH_GOLD,
+        DEPLOY_MARKER,
         REALIGN_ROBOT,
-        RAMP_UP,
-        DRIVE,
-        RAMP_DOWN,
+        DRIVE_TO_CRATER,
         STOP,
         FINISHED
     };
@@ -37,6 +50,13 @@ public class MitchellAuton extends MitchellBase {
     private State current_state = State.BEGIN;
     private ElapsedTime time;
     private long counter = 0;
+
+    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+    private static final String VUFORIA_KEY = "AVGHUv3/////AAABmcdJ2Bhj40jMsHWkpgSOC8MTXXjW6V8+54EbRFI7hqVgq3s60HFO69FCN5V+YnYjVCGDriHQL5nQxn019A5ZARF8cBCTRFQK8d++tokIN6SnnzvRwe94/dmA2hc87+Us6dfomOUlQ/KTuoNd9biHbT2Ez+i9++v/UtubGLA9OEKpUKZEnPwyBdcr3vjpMp2VvJioaSpFrxqQRUTe1ZJrMa22dp7HWhbEBzOFQyXb+dAjbfeMvaD5qjFDeN9kxzdy6PAJqxx8aUH75nmU3K0qvoY9oRb8cPmXxNazNNlgnUWjA1kcF4kZBzvUPyZRK5x1RqAwx4eham+jXee5YwyPCswg8K8PnGpKd8oHRNzTp6ZH";
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
 
     /**
      * Constructor
@@ -51,56 +71,122 @@ public class MitchellAuton extends MitchellBase {
         super.init();
         current_state = State.BEGIN;
         time = new ElapsedTime();
+        left_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linear_actuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        left_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        initVuforia();
+
+        CameraDevice.getInstance().setFlashTorchMode(true);
+
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        }
     }
     @Override
     public void init_loop() {
         super.init_loop();
-        arm_servo.setPosition(MitchellBotCalibration.arm_servo_RETRACTED);
+        //elbow_servo.setPosition(MitchellBotCalibration.elbow_servo_RETRACTED);
     }
 
     protected State handleState(State state, double time_in_state) {
 
         switch (state) {
             case BEGIN:
-                break;
+                return TF_ACTIVATE;
 
-            case LOWER_ARM:
-                arm_servo.setPosition(MitchellBotCalibration.COLOR_SENSOR_POS_DOWN);
+            case LOWER_ACTUATOR:
+                //elbow_servo.setPosition(MitchellBotCalibration.GO_TO_LANDING_POS);
+                linear_actuator.setPower(0.5);
                 if (time_in_state > 1.0) {
-                    return WAIT_FOR_COLOR_SENSOR;
+                    return ADJUST;
                 }
                 break;
 
-            case WAIT_FOR_COLOR_SENSOR:
+            case ADJUST:
                 if (time_in_state > 1) {
-                    return READ_COLOR_SENSOR;
+                    return TF_ACTIVATE;
                 }
                 break;
 
-            case KNOCK_BLUE_JEWEL:
+            case DRIVE_THROUGH_GOLD:
+                encoderDrive(MitchellBotCalibration.DRIVE_SPEED,  12,  -12, 10.0);  // S1: Forward 47 Inches with 5 Sec timeout
+                encoderDrive(MitchellBotCalibration.TURN_SPEED,   12, 12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+                encoderDrive(MitchellBotCalibration.DRIVE_SPEED, -12, 12, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+
+                return STOP;
+
+            case TF_ACTIVATE:
+                if (tfod != null) {
+                    tfod.activate();
+                }
+                return LOOK_FOR_GOLD;
+
+            case DEPLOY_MARKER:
+                //elbow_servo.setPosition(MitchellBotCalibration.GO_TO_HOOK_POS);
                 break;
 
-            case KNOCK_RED_JEWEL:
-                break;
+            case LOOK_FOR_GOLD:
 
-            case RAISE_ARM:
-                arm_servo.setPosition(MitchellBotCalibration.COLOR_SENSOR_POS_UP);
-                break;
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        if (updatedRecognitions.size() == 3) {
+                            int goldMineralX = -1;
+                            int silverMineral1X = -1;
+                            int silverMineral2X = -1;
+                            for (Recognition recognition : updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                } else if (silverMineral1X == -1) {
+                                    silverMineral1X = (int) recognition.getLeft();
+                                } else {
+                                    silverMineral2X = (int) recognition.getLeft();
+                                }
+                            }
+                            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                                if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                    telemetry.addData("Gold Mineral Position", "Left");
+                                    encoderDrive(MitchellBotCalibration.TURN_SPEED,   2, 2, 4.0);
+                                    if (tfod != null) {
+                                        tfod.shutdown();
+                                    }
+                                    return STOP;
+                                } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                    telemetry.addData("Gold Mineral Position", "Right");
+                                    encoderDrive(MitchellBotCalibration.TURN_SPEED,   -2, -2, 4.0);
+                                    if (tfod != null) {
+                                        tfod.shutdown();
+                                    }
+                                    return STOP;
+                                } else {
+                                    telemetry.addData("Gold Mineral Position", "Center");
+                                    encoderDrive(MitchellBotCalibration.DRIVE_SPEED,   -2, 2, 4.0);
+                                    if (tfod != null) {
+                                        tfod.shutdown();
+                                    }
+                                    return STOP;
+                                }
+                            }
+                        }
+                        telemetry.update();
+                    }
+                }
 
-            case REALIGN_ROBOT:
-                break;
-
-            case RAMP_UP:
-                break;
-
-            case DRIVE:
-                break;
-
-            case RAMP_DOWN:
+            case DRIVE_TO_CRATER:
                 break;
 
             case STOP:
-                set_drive_power(0,0);
+                long stopTime = System.currentTimeMillis();
+                set_drive_power(0,0,stopTime);
                 return FINISHED;
 
             case FINISHED:
@@ -126,4 +212,35 @@ public class MitchellAuton extends MitchellBase {
             current_state = new_state;
         }
     }
+
+    /**
+     * Initialize the Vuforia localization engine.
+     */
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = CameraDirection.BACK;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+    }
+
+
+    /**
+     * Initialize the Tensor Flow Object Detection engine.
+     */
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
+
 }

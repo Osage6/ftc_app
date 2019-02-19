@@ -1,47 +1,40 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 /**
- * Created by phurley on 11/10/17.
+ * Inspired by phurley (created original on 11/10/17)
+ *
+ * Modified for Mitchell 4H team, Beyond the Realm of Probabilities by J Happer, Feb 2019
+ *
+ * This class holds all values that we might want to calibrate
+ * The MitchellBotConstants class has methods used in conjunction with the
+ * MitchellMenuController to allow adjustment of these values during the init_loop
  */
-
+@Disabled()
 public class MitchellBotCalibration extends MitchellBotConstants {
-    public static double TRAY_PINCH_EPSILON = 0.07;
-    public static double arm_servo_DEPLOYED = 0.1;
-    public static double arm_servo_RETRACTED = 0.9;
-    public static double SLOW_COLLECT = 0.4;
 
-    public static double TRAY_EPSILON = 0.05;
-    public static double TRAY_DEPLOY_POSITION = 1;
-    public static double TRAY_DRIVE_POSTION = 0.45;
-    public static double TRAY_COLLECT_POSITION = 0;
-    public static double TRAY_PINCH_OPEN = 0.25;
-    public static double TRAY_PINCH_WIDE_OPEN = 0;
-    public static double TRAY_PINCH_CLOSE = 1;
+    public static double DRIVE_SPEED = 0.4;
+    public static double TURN_SPEED = 0.5;
 
-    public static double COLOR_SENSOR_POS_UP = 1.0;
-    public static double COLOR_SENSOR_POS_DOWN = 0.0;
-
-    public static double GEM_DRIVE_DURATION = 0.9;
-
-    public static double RAMP_TIME = 1.0;
-    public static double DRIVE_SPEED = 0.8;
-
-    public static double ELEVATOR_DEADZONE = 0.1;
-    public static double MAX_ELEVATOR_ADJUST = 0.2;
     public static int SAMPLES = 50;
-    public static double REVERSE_POWER = 0.25;
-    public static double MAX_INTAKE_POWER = 0.4;
-    public static double WIGGLE_WAIT = 0.4;
+    public static double MAX_INTAKE_POWER = 0.9;
+    public static double ELEVATOR_POWER = 0.5;
 
     public static boolean LOCK_DRIVE_WHEELS = false;
     public static boolean LOCK_ARM = true;
 
     public static boolean RAMP_DRIVE_POWER = true;
-    public static double RAMP_DRIVE_DURATION = 0.0015;
-    public static long TRAY_RAMP_DURATION = 750;
+    public static double RAMP_DRIVE_DURATION = 0.0005;
 
     public static boolean INITIALIZE_IMU = false;
     public static boolean INITIALIZE_VUFORIA = false;
+
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public MitchellBotCalibration() {}
 }

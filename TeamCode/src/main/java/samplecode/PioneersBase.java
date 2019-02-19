@@ -1,6 +1,6 @@
 // Copyright (c) 2017 FTC Team 10262 Pioπeers
 
-package org.firstinspires.ftc.teamcode;
+package samplecode;
 
 import android.content.Context;
 

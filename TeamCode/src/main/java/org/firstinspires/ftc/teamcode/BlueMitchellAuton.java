@@ -4,15 +4,24 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import static org.firstinspires.ftc.teamcode.MitchellAuton.State.LOWER_ARM;
-import static org.firstinspires.ftc.teamcode.MitchellAuton.State.RAISE_ARM;
-import static org.firstinspires.ftc.teamcode.MitchellAuton.State.RAMP_UP;
+import static org.firstinspires.ftc.teamcode.MitchellAuton.State.TF_ACTIVATE;
 
 /**
  * AutonDrive Mode
  * <p>
+ *
+ *     Modified by Mitchell 4H from 12/18/18
+ *
+ *     handleState includes "default:" which means we finally check any of the states in
+ *     the superclass that are not included in this color/alliance dependent list of
+ *     states. So you need to have MitchellAuton.java opened along with this one if you
+ *     want to get a fuller picture of the state machine
+ *
+ *     Other than dealing with the states that are specific to the color alliance, this
+ *     does not add anything new
  */
-@Autonomous(name="Blue Auton 10262", group="Pioneer 10262")
+//@Disabled()
+@Autonomous(name="BlueMitchellAuton", group="BeyondTheRealm")
 public class BlueMitchellAuton extends MitchellAuton {
     /**
      * Constructor
@@ -31,48 +40,7 @@ public class BlueMitchellAuton extends MitchellAuton {
     protected State handleState(State state, double time_in_state) {
         switch (state) {
             case BEGIN:
-                state = LOWER_ARM;
-                break;
-
-            case FOUND_BLUE_JEWEL:
-                if (time_in_state < MitchellBotCalibration.GEM_DRIVE_DURATION) {
-                    set_drive_power(-0.3, -0.3);
-                } else {
-                    state = RAISE_ARM;
-                }
-                break;
-
-            case FOUND_RED_JEWEL:
-                if (time_in_state < MitchellBotCalibration.GEM_DRIVE_DURATION) {
-                    set_drive_power(0.3, 0.3);
-                } else {
-                    state = RAISE_ARM;
-                }
-                break;
-
-            case RAISE_ARM:
-                super.handleState(state, time_in_state);
-                state = RAMP_UP;
-                break;
-
-            case RAMP_UP:
-                if (time_in_state > MitchellBotCalibration.RAMP_TIME) {
-                    state = State.RAMP_DOWN;
-                } else {
-                    double percent = time_in_state / MitchellBotCalibration.RAMP_TIME;
-                    double power = MitchellBotCalibration.DRIVE_SPEED * percent;
-                    set_drive_power(power, power);
-                }
-                break;
-
-            case RAMP_DOWN:
-                if (time_in_state > MitchellBotCalibration.RAMP_TIME) {
-                    state = State.STOP;
-                } else {
-                    double percent = 1.0 - (time_in_state / MitchellBotCalibration.RAMP_TIME);
-                    double power = MitchellBotCalibration.DRIVE_SPEED * percent;
-                    set_drive_power(power, power);
-                }
+                state = TF_ACTIVATE;
                 break;
 
             default:

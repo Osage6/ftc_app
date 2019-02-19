@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Created by phurley on 11/10/17.
  */
-
+@Disabled()
 public class MitchellMenuController {
     private final MitchellBotConstants consts;
     private List<Field> menu_items;
@@ -45,6 +46,7 @@ public class MitchellMenuController {
             String name = field.getName();
             String value = null;
             value = field.get(null).toString();
+            //pass null because we only have static fields, which belong to the class rather than to different instances
             telemetry.addData("Calibrate", name + ": " + value);
 
             if (wasPressed) {
@@ -63,10 +65,8 @@ public class MitchellMenuController {
                 setValue(1);
             } else if (gamepad.left_bumper && gamepad.right_bumper) {
                 consts.writeToFile();
-                telemetry.addData("Calibrate", "saved");
             } else if (gamepad.start) {
                 consts.readFromFile();
-                telemetry.addData("Calibrate", "reload");
             } else if (Math.abs(gamepad.right_stick_x) > 0.1) {
                 setValue(gamepad.right_stick_x);
             }

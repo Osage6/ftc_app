@@ -1,6 +1,6 @@
 // Copyright (c) 2017 FTC Team 10262 HippoBotamuses
 
-package org.firstinspires.ftc.teamcode;
+package samplecode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -20,7 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import static org.firstinspires.ftc.teamcode.PioneersAuton.State.*;
+import static samplecode.PioneersAuton.State.*;
 
 /**
  * AutonDrive Mode

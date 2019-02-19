@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode;
+package samplecode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Created by phurley on 11/10/17.
  */
-
+@Disabled()
 public class PioneersMenuController {
     private final PioneersConstants consts;
     private List<Field> menu_items;

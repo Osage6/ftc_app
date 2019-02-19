@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package samplecode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * Created by phurley on 10/27/17.
  */
-
+@Disabled()
 public class PioneersTimeRamp {
     private double start, finish, range;
     private long duration;

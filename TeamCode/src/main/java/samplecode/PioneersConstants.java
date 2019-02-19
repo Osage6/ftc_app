@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode;
+package samplecode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.Consumer;
 
@@ -19,7 +21,7 @@ import java.util.Vector;
 /**
  * Created by phurley on 11/10/17.
  */
-
+@Disabled()
 public class PioneersConstants {
 
     public static String getFileName() {

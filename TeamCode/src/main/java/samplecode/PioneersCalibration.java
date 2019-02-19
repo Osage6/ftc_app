@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package samplecode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * Created by phurley on 11/10/17.
  */
-
+@Disabled()
 public class PioneersCalibration extends PioneersConstants {
     public static double TRAY_PINCH_EPSILON = 0.07;
     public static double JEWEL_ARM_DEPLOYED = 0.1;

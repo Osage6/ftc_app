@@ -18,17 +18,28 @@ import java.util.Vector;
 
 /**
  * Created by phurley on 11/10/17.
+ *
+ * Mitchell 4H modifications from 12/18/18 by J Happer
+ * This class is full of methods that can be used during init() of an opmode
+ * to calibrate and store various parameters for robot behavior
+ * We can choose not to use any of this, but the calibration file currently extends this
+ * class, so we need to keep it in any build.
  */
 
 public class MitchellBotConstants {
 
     public static String getFileName() {
         File file = new File("/sdcard", "calibration.properties");
+        //https://developer.android.com/training/data-storage/files#java
+        //Context context = getContext();
+        //File file = new File(context.getFilesDir(),"calibration.properties");
         return file.getAbsolutePath();
     }
 
     private static String getResolvedFileName() {
         return getFileName().replaceFirst("^~", System.getProperty("user.home"));
+        //the ^ means match only at the beginning
+        //https://stackoverflow.com/questions/7163364/how-to-handle-in-file-paths
     }
 
     public Field[] getFields() {
@@ -52,6 +63,8 @@ public class MitchellBotConstants {
         for (Field field : this.getClass().getDeclaredFields()) {
             if (!java.lang.reflect.Modifier.isFinal(field.getModifiers()))
                 func.accept(field);
+            // see example here https://www.javabrahman.com/java-8/java-8-java-util-function-consumer-tutorial-with-examples/
+            //https://stackoverflow.com/questions/3422390/retrieve-only-static-fields-declared-in-java-class
         }
     }
 
@@ -88,6 +101,7 @@ public class MitchellBotConstants {
             });
 
             // save properties to project root folder
+            // Note "store" and "load" https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html
             output = new FileOutputStream(getResolvedFileName());
             Writer writer = new OutputStreamWriter(output);
             data.store(writer, "FTC Calibration Constants");
@@ -108,6 +122,12 @@ public class MitchellBotConstants {
     public void setField(Field f, String value) {
         try {
             Class<?> klass = f.getType();
+            //https://stackoverflow.com/questions/9921676/what-does-class-mean-in-java
+            //https://stackoverflow.com/questions/462297/how-to-use-classt-in-java
+            //https://www.geeksforgeeks.org/java-lang-class-class-java-set-1/
+            //https://www.linkedin.com/learning/advanced-java-programming/using-the-class-class
+            //https://www.programcreek.com/java-api-examples/?class=java.lang.reflect.Field&method=getType
+            //https://stackoverflow.com/questions/40486720/what-is-a-runtime-class-in-java
             if (value != null) {
                 if (klass.equals(Integer.TYPE)) {
                     f.setInt(this, Integer.parseInt(value));

@@ -1,7 +1,8 @@
 // Copyright (c) 2017 FTC Team 10262 Pioπeers
 
-package org.firstinspires.ftc.teamcode;
+package samplecode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * ArcadeDrive Mode
  * <p>
  */
+@Disabled()
 @TeleOp(name="PioneersTeleop", group="Teleop")
 public class PioneersTeleop extends PioneersBase {
 
