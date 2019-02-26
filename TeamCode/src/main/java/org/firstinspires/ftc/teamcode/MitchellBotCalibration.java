@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Disabled()
 public class MitchellBotCalibration extends MitchellBotConstants {
 
-    public static double DRIVE_SPEED = 0.4;
-    public static double TURN_SPEED = 0.5;
+    public static double DRIVE_SPEED = 0.3;
+    public static double TURN_SPEED = 0.2;
 
     public static int SAMPLES = 50;
     public static double MAX_INTAKE_POWER = 0.9;
@@ -29,6 +29,12 @@ public class MitchellBotCalibration extends MitchellBotConstants {
 
     public static boolean INITIALIZE_IMU = false;
     public static boolean INITIALIZE_VUFORIA = false;
+
+    public static double LG_TL = .3;
+    public static double LG_TL1 = 2.0;
+    public static double LG_S = 2.0;
+    public static double LG_TR = .3;
+    public static double LG_TR1 = 2.0;
 
     static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP

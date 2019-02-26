@@ -139,44 +139,72 @@ public class MitchellAuton extends MitchellBase {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        if (updatedRecognitions.size() == 3) {
+                        if (time_in_state > 5.0 || updatedRecognitions.size() == 3){
                             int goldMineralX = -1;
                             int silverMineral1X = -1;
                             int silverMineral2X = -1;
+                            int im_width = -1;
+                            int gM_sector = -1;
+                            int sM1_sector = -1;
+                            int sM2_sector = -1;
                             for (Recognition recognition : updatedRecognitions) {
                                 if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                     goldMineralX = (int) recognition.getLeft();
+                                    im_width = recognition.getImageWidth();
+                                    if (goldMineralX < 2*im_width/3){
+                                        if (goldMineralX < im_width/3){
+                                            gM_sector = 1;
+                                        } else {gM_sector = 2;}
+                                    } else {gM_sector = 3;}
                                 } else if (silverMineral1X == -1) {
                                     silverMineral1X = (int) recognition.getLeft();
+                                    im_width = recognition.getImageWidth();
+                                    if (silverMineral1X < 2*im_width/3){
+                                        if (silverMineral1X < im_width/3){
+                                            sM1_sector = 1;
+                                        } else {sM1_sector = 2;}
+                                    } else {sM1_sector = 3;}
                                 } else {
                                     silverMineral2X = (int) recognition.getLeft();
+                                    im_width = recognition.getImageWidth();
+                                    if (silverMineral2X < 2*im_width/3){
+                                        if (silverMineral2X < im_width/3){
+                                            sM2_sector = 1;
+                                        } else {sM2_sector = 2;}
+                                    } else {sM2_sector = 3;}
                                 }
                             }
-                            if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-                                if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-                                    telemetry.addData("Gold Mineral Position", "Left");
-                                    encoderDrive(MitchellBotCalibration.TURN_SPEED,   2, 2, 4.0);
-                                    if (tfod != null) {
-                                        tfod.shutdown();
-                                    }
-                                    return STOP;
-                                } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                                    telemetry.addData("Gold Mineral Position", "Right");
-                                    encoderDrive(MitchellBotCalibration.TURN_SPEED,   -2, -2, 4.0);
-                                    if (tfod != null) {
-                                        tfod.shutdown();
-                                    }
-                                    return STOP;
-                                } else {
-                                    telemetry.addData("Gold Mineral Position", "Center");
-                                    encoderDrive(MitchellBotCalibration.DRIVE_SPEED,   -2, 2, 4.0);
-                                    if (tfod != null) {
-                                        tfod.shutdown();
-                                    }
-                                    return STOP;
+                            double lg_tl = 10*MitchellBotCalibration.LG_TL;
+                            double lg_tl1 = 10*MitchellBotCalibration.LG_TL1;
+                            double lg_s = 10*MitchellBotCalibration.LG_S;
+                            double lg_tr = 10*MitchellBotCalibration.LG_TR;
+                            double lg_tr1 = 10*MitchellBotCalibration.LG_TR1;
+
+                            if ((gM_sector == 1) || ((sM1_sector == 2) && (sM2_sector == 3)) || ((sM1_sector == 3) && (sM2_sector == 2)) ) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                encoderDrive(MitchellBotCalibration.TURN_SPEED, lg_tl, lg_tl, 4.0);
+                                encoderDrive(MitchellBotCalibration.DRIVE_SPEED, -lg_tl1, lg_tl1, 4.0);
+                                if (tfod != null) {
+                                    tfod.shutdown();
                                 }
-                            }
+                                return STOP;
+                           } else if (gM_sector == 3 || (sM1_sector == 1 && sM2_sector == 2) || (sM1_sector == 2 && sM2_sector == 1) ) {
+                                telemetry.addData("Gold Mineral Position", "Right");
+                                encoderDrive(MitchellBotCalibration.TURN_SPEED, -lg_tr, -lg_tr, 4.0);
+                                encoderDrive(MitchellBotCalibration.DRIVE_SPEED, -lg_tr1, lg_tr1, 4.0);
+                                if (tfod != null) {
+                                    tfod.shutdown();
+                                }
+                                return STOP;
+                            } else if (gM_sector == 2 || (sM1_sector == 1 && sM2_sector == 3) || (sM1_sector == 3 && sM2_sector == 1) ) {
+                                telemetry.addData("Gold Mineral Position", "Center");
+                                encoderDrive(MitchellBotCalibration.DRIVE_SPEED, -lg_s, lg_s, 4.0);
+                                if (tfod != null) {
+                                    tfod.shutdown();
+                                }
+                                return STOP;                            }
                         }
+
                         telemetry.update();
                     }
                 }
