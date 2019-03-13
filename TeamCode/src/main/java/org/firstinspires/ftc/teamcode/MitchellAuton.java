@@ -28,13 +28,14 @@ import static org.firstinspires.ftc.teamcode.MitchellAuton.State.TF_ACTIVATE;
  *     The states that require knowledge of the color alliance are left to the
  *     subclass that extends this one
  *     This sets the initial state and behavior when autonomous begins
- *
+ * I'm making a change here for illustrative purposes (Git)
  */
 //@Disabled
 public class MitchellAuton extends MitchellBase {
 
     enum State {
         BEGIN,
+        TESTING,
         LOWER_ACTUATOR,
         ADJUST,
         TF_ACTIVATE,
