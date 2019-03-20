@@ -35,7 +35,6 @@ public class MitchellAuton extends MitchellBase {
 
     enum State {
         BEGIN,
-        TESTING,
         LOWER_ACTUATOR,
         ADJUST,
         TF_ACTIVATE,
