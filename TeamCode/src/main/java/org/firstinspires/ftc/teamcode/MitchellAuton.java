@@ -44,8 +44,7 @@ public class MitchellAuton extends MitchellBase {
         REALIGN_ROBOT,
         DRIVE_TO_CRATER,
         STOP,
-        FINISHED,
-        CLAUDIA
+        FINISHED
     };
 
     private State current_state = State.BEGIN;
